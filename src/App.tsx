@@ -112,7 +112,8 @@ export default function MastraStylePortfolio() {
       github: "https://github.com/mkjun2016",
       linkedin: "https://www.linkedin.com/in/mkjunkevin",
       email: "mailto:moonkyu.jun@stonybrook.edu",
-      resume: "#",
+      resume:
+        "https://drive.google.com/file/d/1lPvVYdwD3CBrGHX4_Wk_4db6Fi_SEFYS/view?usp=sharing",
     },
   };
 
