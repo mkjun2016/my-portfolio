@@ -107,6 +107,8 @@ export default function MastraStylePortfolio() {
   const profile = {
     name: "Moonkyu (Kevin) Jun",
     title: "Computer Science @ Stony Brook • XR + Computer Vision Builder",
+    tagline:
+      "B.S. in Computer Science (Minor in Industrial Engineering) • Expected Aug 2027",
     location: "Stony Brook, NY",
     links: {
       github: "https://github.com/mkjun2016",
@@ -115,6 +117,27 @@ export default function MastraStylePortfolio() {
       resume:
         "https://drive.google.com/file/d/1lPvVYdwD3CBrGHX4_Wk_4db6Fi_SEFYS/view?usp=sharing",
     },
+  };
+
+  const education = {
+    school: "Stony Brook University",
+    degree: "B.S. in Computer Science",
+    minor: "Minor in Industrial Engineering",
+    graduation: "Expected Aug 2027",
+    location: "Stony Brook, NY",
+    coursework: [
+      "Computer Vision",
+      "System Fundamentals",
+      "Analysis of Algorithms",
+    ],
+    honors: ["Dean's List"],
+  };
+
+  const skills = {
+    languages: ["Python", "C/C++", "JavaScript", "TypeScript"],
+    mlcv: ["PyTorch", "YOLOv8", "Applied Computer Vision Pipelines"],
+    platforms: ["Docker", "FastAPI", "MongoDB", "React.js", "React Native"],
+    xr: ["Unity", "Real-time Rendering", "Interactive 3D Systems"],
   };
 
   const highlights = [
@@ -138,21 +161,38 @@ export default function MastraStylePortfolio() {
   const projects = [
     {
       title: "XR / OCT Volumetric Viewer",
-      desc: "Volume rendering + interactive slicing/annotation prototypes for XR workflows.",
-      tags: ["Unity", "XR", "Shaders", "OCT"],
+      desc: "Built an XR visualization system for volumetric OCT data using Unity, enabling real-time gaze-driven interaction and volumetric slicing. Designed data pipelines bridging raw 3D medical imaging data and interactive visualization, improving rendering performance and enabling real-time interaction with high-resolution volumes.",
+      tags: ["Unity", "XR", "Real-time Rendering", "OCT", "3D Systems"],
       href: "#",
+      featured: true,
+      date: "Oct 2025 – Present",
+      links: {
+        github: "#",
+        demo: "#",
+        paper: "#",
+      },
     },
     {
-      title: "AI Defect Analysis Dashboard",
-      desc: "React + CV pipeline to review detections, visualize results, and speed up QA decisions.",
-      tags: ["React", "YOLO", "FastAPI", "Docker"],
+      title: "Edge-Optimized CCTV Analytics System",
+      desc: "Designed an edge-based video analytics pipeline for real-time object detection, focusing on reducing inference latency under constrained network environments. Implemented computer vision models and system-level optimizations to reduce bandwidth usage and improve end-to-end responsiveness by analyzing trade-offs between edge and server-side inference.",
+      tags: ["PyTorch", "YOLOv8", "Edge Computing", "Computer Vision"],
       href: "#",
+      featured: true,
+      date: "June 2025",
+      links: {
+        github: "https://github.com/mkjun2016/edge-opt-cctv.git",
+      },
     },
     {
-      title: "EmoAI-Translator",
-      desc: "Multimodal app idea: speech + emotion signals → translated, context-aware output.",
-      tags: ["Flutter", "Whisper", "DeepFace", "API"],
+      title: "EmoAI – Emotion-Aware Translation System",
+      desc: "Developed an AI-powered emotion-aware translation system that analyzes speaker tone and emotional context to generate real-time, contextually aligned translations. Combines speech recognition with emotion analysis to provide emotionally-intelligent language translation.",
+      tags: ["AI", "NLP", "Emotion Recognition", "Translation"],
       href: "#",
+      featured: true,
+      date: "June 2025",
+      links: {
+        github: "https://github.com/EmoAI-Translator/EmoAI-Translator.git",
+      },
     },
   ];
 
@@ -160,33 +200,34 @@ export default function MastraStylePortfolio() {
     {
       role: "Undergraduate Research Assistant",
       org: "CVC Lab, Stony Brook University",
+      location: "Stony Brook, NY",
       period: "Oct 2025 – Present",
       bullets: [
-        "Built XR visualization for volumetric OCT data; iterated on interaction + rendering stability.",
-        "Prototyped tools (slicing, measurement, annotation) to accelerate researcher feedback loops.",
+        "Built an XR visualization system for volumetric OCT data using Unity, enabling real-time gaze-driven interaction and volumetric slicing, reducing manual data curation for researchers",
+        "Designed data pipelines bridging raw 3D medical imaging data and interactive visualization, improving rendering performance and enabling real-time interaction with high-resolution volumes",
+      ],
+    },
+    {
+      role: "Full Stack Developer Intern",
+      org: "MarkCloud Co., Ltd.",
+      location: "Seoul, Korea",
+      period: "Apr 2025 – June 2025",
+      bullets: [
+        "Developed an AI-powered defect analysis interface using React.js and YOLOv8, enabling real-time visual QA and improving defect detection efficiency for automotive inspection workflows",
+        "Led backend system design using FastAPI and MongoDB for an OCR-based ad compliance platform in collaboration with Industrial Bank of Korea, supporting enterprise-scale data processing and regulatory validation",
+        "Built enterprise-grade groupware and containerized services using Docker, supporting MSA-based deployment and improving system scalability and maintainability",
       ],
     },
     {
       role: "Frontend Developer Intern",
-      org: "SME / Startup",
-      period: "2024 – 2025",
+      org: "J&J Tech Inc.",
+      location: "Incheon, Korea",
+      period: "July 2023 – Sep 2023",
       bullets: [
-        "Shipped production UI features with React/TypeScript; improved workflows and reliability.",
-        "Collaborated across engineering + stakeholders to refine requirements and deliver fast.",
+        'Developed and launched "YakManager Global," a cross-platform pharmacy app using React Native, scaling to 50K+ global users with high performance and reliability',
+        "Built scalable UI/UX components with multi-language support and API integrations, improving responsiveness and usability across iOS and Android platforms",
+        "Led overseas usability testing, identified latency issues caused by Naver Cloud infrastructure, and proposed AWS migration to improve international performance and scalability",
       ],
-    },
-  ];
-
-  const writing = [
-    {
-      title: "How I build demos that don’t break",
-      desc: "A practical checklist for shipping reliable prototypes under tight deadlines.",
-      href: "#",
-    },
-    {
-      title: "From volume data to interactive XR",
-      desc: "Notes on shaders, transfer functions, and interaction design for 3D medical data.",
-      href: "#",
     },
   ];
 
@@ -227,8 +268,8 @@ export default function MastraStylePortfolio() {
 
           <nav className="hidden items-center gap-1 md:flex">
             <NavLink href="#projects">Projects</NavLink>
+            <NavLink href="#education">Education</NavLink>
             <NavLink href="#experience">Experience</NavLink>
-            <NavLink href="#writing">Writing</NavLink>
             <NavLink href="#contact">Contact</NavLink>
           </nav>
 
@@ -261,49 +302,62 @@ export default function MastraStylePortfolio() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="flex flex-col gap-6"
+              className="flex flex-col md:flex-row gap-6 md:gap-8"
             >
-              <div className="inline-flex w-fit items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/70">
-                <span className="h-1.5 w-1.5 rounded-full bg-white/60" />
-                <span>{profile.location}</span>
-                <span className="text-white/30">•</span>
-                <span className="hidden sm:inline">
-                  Open to research + internships
-                </span>
-              </div>
+              <motion.img
+                src="public/profile.jpeg"
+                alt="Profile"
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="h-48 w-48 md:h-64 md:w-64 mx-auto md:mx-0 rounded-3xl border-2 border-white/20 bg-white/5 shadow-[0_0_40px_rgba(255,255,255,0.15)] object-cover"
+              />
 
-              <h1 className="text-balance text-4xl font-semibold tracking-tight md:text-6xl">
-                Build <span className="text-white/60">impactful</span> systems
-                <br />
-                <span className="bg-gradient-to-r from-white via-white/70 to-white/40 bg-clip-text text-transparent">
-                  from idea to shipped demo.
-                </span>
-              </h1>
+              <div className="flex flex-1 flex-col gap-6">
+                <div className="inline-flex w-fit items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/70">
+                  <span className="h-1.5 w-1.5 rounded-full bg-white/60" />
+                  <span>{profile.location}</span>
+                  <span className="text-white/30">•</span>
+                  <span className="hidden sm:inline">
+                    Open to research + internships
+                  </span>
+                </div>
 
-              <p className="max-w-2xl text-pretty text-base text-white/70 md:text-lg">
-                I’m a CS student focused on XR + computer vision. I like clean
-                UX, measurable loops, and prototypes that survive real usage.
-              </p>
+                <h1 className="text-balance text-4xl font-semibold tracking-tight md:text-6xl">
+                  Build <span className="text-white/60">impactful</span> systems
+                  <br />
+                  <span className="bg-gradient-to-r from-white via-white/70 to-white/40 bg-clip-text text-transparent">
+                    from idea to shipped demo.
+                  </span>
+                </h1>
 
-              <div className="flex flex-wrap items-center gap-2">
-                {TAGS.map((t) => (
-                  <Pill key={t}>{t}</Pill>
-                ))}
-              </div>
+                <p className="max-w-2xl text-pretty text-base text-white/70 md:text-lg">
+                  I’m a CS student focused on XR + computer vision. I like clean
+                  UX, measurable loops, and prototypes that survive real usage.
+                </p>
+                <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                  <p className="text-sm text-white/80">{profile.tagline}</p>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  {TAGS.map((t) => (
+                    <Pill key={t}>{t}</Pill>
+                  ))}
+                </div>
 
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <a
-                  href="#projects"
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90"
-                >
-                  View Projects <ArrowRight className="h-4 w-4" />
-                </a>
-                <a
-                  href={profile.links.email}
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-white/80 transition hover:bg-white/10"
-                >
-                  Email me <Mail className="h-4 w-4" />
-                </a>
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <a
+                    href="#projects"
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90"
+                  >
+                    View Projects <ArrowRight className="h-4 w-4" />
+                  </a>
+                  <a
+                    href={profile.links.email}
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-white/80 transition hover:bg-white/10"
+                  >
+                    Email me <Mail className="h-4 w-4" />
+                  </a>
+                </div>
               </div>
             </motion.div>
 
@@ -328,10 +382,10 @@ export default function MastraStylePortfolio() {
         {/* Projects */}
         <Section
           id="projects"
-          title="Projects"
-          kicker="Selected work, shipped or shipping"
+          title="Selected Projects"
+          kicker="Featured work & research"
         >
-          <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="text-sm text-white/60">
               Search projects by keyword (title, description, tags).
             </div>
@@ -346,37 +400,239 @@ export default function MastraStylePortfolio() {
             </div>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            {filteredProjects.map((p) => (
-              <Card key={p.title} className="h-full">
-                <div className="flex h-full flex-col">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <div className="text-base font-semibold">{p.title}</div>
-                      <p className="mt-2 text-sm text-white/70">{p.desc}</p>
+          <div className="space-y-6">
+            {filteredProjects.map((p, idx) => (
+              <Card key={p.title} className="group/project">
+                <div className="flex flex-col gap-6 md:flex-row md:gap-8">
+                  {/* Project Thumbnail */}
+                  <div className="flex-shrink-0">
+                    <div className="relative h-48 w-full overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-white/10 to-white/5 md:h-44 md:w-56">
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        {p.featured ? (
+                          <div className="flex flex-col items-center gap-3">
+                            <div className="rounded-2xl border border-white/20 bg-white/10 p-4 backdrop-blur">
+                              {idx === 0 && (
+                                <Layers className="h-8 w-8 text-white/80" />
+                              )}
+                              {idx === 1 && (
+                                <Search className="h-8 w-8 text-white/80" />
+                              )}
+                              {idx === 2 && (
+                                <Cpu className="h-8 w-8 text-white/80" />
+                              )}
+                            </div>
+                            <div className="text-xs text-white/50">
+                              Featured Project
+                            </div>
+                          </div>
+                        ) : (
+                          <Code2 className="h-12 w-12 text-white/40" />
+                        )}
+                      </div>
+                      {p.featured && (
+                        <div className="absolute right-2 top-2">
+                          <div className="rounded-full border border-white/20 bg-white/10 px-2 py-1 text-xs text-white/80 backdrop-blur">
+                            ⭐ Featured
+                          </div>
+                        </div>
+                      )}
                     </div>
-                    <a
-                      href={p.href}
-                      className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80 transition hover:bg-white/10"
-                    >
-                      <span>Open</span>
-                      <ExternalLink className="h-3.5 w-3.5" />
-                    </a>
                   </div>
 
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {p.tags.map((t: string) => (
-                      <Pill key={t}>{t}</Pill>
-                    ))}
-                  </div>
+                  {/* Project Details */}
+                  <div className="flex flex-1 flex-col">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3">
+                          <h3 className="text-xl font-semibold text-white group-hover/project:text-white/90">
+                            {p.title}
+                          </h3>
+                          <span className="text-sm text-white/40">
+                            {p.date}
+                          </span>
+                        </div>
+                        <p className="mt-3 text-base leading-relaxed text-white/70">
+                          {p.desc}
+                        </p>
+                      </div>
+                    </div>
 
-                  <div className="mt-6 flex items-center gap-2 text-xs text-white/50">
-                    <FlaskConical className="h-3.5 w-3.5" />
-                    <span>Design → build → test → iterate</span>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {p.tags.map((t: string) => (
+                        <Pill key={t}>{t}</Pill>
+                      ))}
+                    </div>
+
+                    <div className="mt-6 flex flex-wrap items-center gap-3">
+                      {p.links.github && (
+                        <a
+                          href={p.links.github}
+                          className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 transition hover:bg-white/10"
+                        >
+                          <Github className="h-4 w-4" />
+                          <span>Code</span>
+                        </a>
+                      )}
+                      {p.links.demo && (
+                        <a
+                          href={p.links.demo}
+                          className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 transition hover:bg-white/10"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                          <span>Demo</span>
+                        </a>
+                      )}
+                      {"paper" in p.links && p.links.paper && (
+                        <a
+                          href={p.links.paper}
+                          className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 transition hover:bg-white/10"
+                        >
+                          <FlaskConical className="h-4 w-4" />
+                          <span>Paper</span>
+                        </a>
+                      )}
+                    </div>
                   </div>
                 </div>
               </Card>
             ))}
+          </div>
+
+          {filteredProjects.length === 0 && (
+            <div className="py-12 text-center text-white/50">
+              No projects found matching "{query}"
+            </div>
+          )}
+        </Section>
+
+        {/* Education */}
+        <Section
+          id="education"
+          title="Education"
+          kicker="Academic background & achievements"
+        >
+          <Card>
+            <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+              <div className="flex-1">
+                <div className="flex items-start gap-4">
+                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5">
+                    <Sparkles className="h-6 w-6" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold">
+                      {education.school}
+                    </h3>
+                    <p className="mt-1 text-sm text-white/70">
+                      {education.degree}
+                    </p>
+                    <p className="text-sm text-white/60">{education.minor}</p>
+                  </div>
+                </div>
+
+                <div className="mt-6 grid gap-4 md:grid-cols-2">
+                  <div>
+                    <div className="text-xs font-semibold uppercase tracking-wide text-white/50">
+                      Relevant Coursework
+                    </div>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {education.coursework.map((course) => (
+                        <Pill key={course}>{course}</Pill>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs font-semibold uppercase tracking-wide text-white/50">
+                      Honors & Awards
+                    </div>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {education.honors.map((honor) => (
+                        <span
+                          key={honor}
+                          className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/80"
+                        >
+                          <span>🏆</span>
+                          {honor}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2 text-right">
+                <div className="text-sm font-semibold text-white/80">
+                  {education.location}
+                </div>
+                <div className="text-sm text-white/60">
+                  {education.graduation}
+                </div>
+              </div>
+            </div>
+          </Card>
+        </Section>
+
+        {/* Skills */}
+        <Section
+          id="skills"
+          title="Technical Skills"
+          kicker="Tools & technologies"
+        >
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card>
+              <div className="flex items-start gap-3">
+                <Code2 className="h-5 w-5 text-white/80" />
+                <div className="flex-1">
+                  <div className="text-sm font-semibold">Languages</div>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {skills.languages.map((lang) => (
+                      <Pill key={lang}>{lang}</Pill>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            <Card>
+              <div className="flex items-start gap-3">
+                <Cpu className="h-5 w-5 text-white/80" />
+                <div className="flex-1">
+                  <div className="text-sm font-semibold">ML/CV</div>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {skills.mlcv.map((tech) => (
+                      <Pill key={tech}>{tech}</Pill>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            <Card>
+              <div className="flex items-start gap-3">
+                <Layers className="h-5 w-5 text-white/80" />
+                <div className="flex-1">
+                  <div className="text-sm font-semibold">Platforms</div>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {skills.platforms.map((platform) => (
+                      <Pill key={platform}>{platform}</Pill>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            <Card>
+              <div className="flex items-start gap-3">
+                <FlaskConical className="h-5 w-5 text-white/80" />
+                <div className="flex-1">
+                  <div className="text-sm font-semibold">Visualization/XR</div>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {skills.xr.map((xr) => (
+                      <Pill key={xr}>{xr}</Pill>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </Card>
           </div>
         </Section>
 
@@ -393,6 +649,9 @@ export default function MastraStylePortfolio() {
                   <div>
                     <div className="text-base font-semibold">{e.role}</div>
                     <div className="mt-1 text-sm text-white/70">{e.org}</div>
+                    {e.location && (
+                      <div className="text-sm text-white/50">{e.location}</div>
+                    )}
                   </div>
                   <div className="text-sm text-white/50">{e.period}</div>
                 </div>
@@ -401,32 +660,6 @@ export default function MastraStylePortfolio() {
                     <li key={b}>{b}</li>
                   ))}
                 </ul>
-              </Card>
-            ))}
-          </div>
-        </Section>
-
-        {/* Writing */}
-        <Section
-          id="writing"
-          title="Writing"
-          kicker="Notes, checklists, and breakdowns"
-        >
-          <div className="grid gap-4 md:grid-cols-2">
-            {writing.map((w) => (
-              <Card key={w.title}>
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <div className="text-base font-semibold">{w.title}</div>
-                    <div className="mt-2 text-sm text-white/70">{w.desc}</div>
-                  </div>
-                  <a
-                    href={w.href}
-                    className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80 transition hover:bg-white/10"
-                  >
-                    Read <ArrowRight className="h-3.5 w-3.5" />
-                  </a>
-                </div>
               </Card>
             ))}
           </div>
