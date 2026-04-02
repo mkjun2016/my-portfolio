@@ -102,6 +102,7 @@ const NavLink = ({ href, children }: NavLinkProps) => (
 
 export default function MastraStylePortfolio() {
   const [query, setQuery] = useState("");
+  const profileImageSrc = `${import.meta.env.BASE_URL}profile.jpeg`;
 
   // ===== Customize these =====
   const profile = {
@@ -305,7 +306,7 @@ export default function MastraStylePortfolio() {
               className="flex flex-col md:flex-row gap-6 md:gap-8"
             >
               <motion.img
-                src="/profile.jpeg"
+                src={profileImageSrc}
                 alt="Profile"
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
