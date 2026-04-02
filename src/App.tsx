@@ -115,6 +115,7 @@ export default function MastraStylePortfolio() {
     location: "Stony Brook, NY",
     links: {
       github: "https://github.com/mkjun2016",
+      blog: "https://velog.io/@mkjun2022/posts",
       linkedin: "https://www.linkedin.com/in/mkjunkevin",
       email: "mailto:moonkyu.jun@stonybrook.edu",
       resume:
@@ -295,6 +296,15 @@ export default function MastraStylePortfolio() {
             >
               <Github className="h-4 w-4" />
               <span className="hidden sm:inline">GitHub</span>
+            </a>
+            <a
+              href={profile.links.blog}
+              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/80 transition hover:bg-white/10"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <ExternalLink className="h-4 w-4" />
+              <span className="hidden sm:inline">Blog</span>
             </a>
             <a
               href={profile.links.resume}
