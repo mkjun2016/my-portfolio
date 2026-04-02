@@ -12,6 +12,7 @@ import {
   Layers,
   Cpu,
   Search,
+  Satellite,
 } from "lucide-react";
 
 /**
@@ -102,6 +103,7 @@ const NavLink = ({ href, children }: NavLinkProps) => (
 
 export default function MastraStylePortfolio() {
   const [query, setQuery] = useState("");
+  const [showAllProjects, setShowAllProjects] = useState(false);
   const profileImageSrc = `${import.meta.env.BASE_URL}profile.jpeg`;
 
   // ===== Customize these =====
@@ -109,7 +111,7 @@ export default function MastraStylePortfolio() {
     name: "Moonkyu (Kevin) Jun",
     title: "Computer Science @ Stony Brook • XR + Computer Vision Builder",
     tagline:
-      "B.S. in Computer Science (Minor in Industrial Engineering) • Expected Aug 2027",
+      "B.S. in Computer Science (Minor in Industrial Engineering) • Stony Brook University",
     location: "Stony Brook, NY",
     links: {
       github: "https://github.com/mkjun2016",
@@ -118,20 +120,6 @@ export default function MastraStylePortfolio() {
       resume:
         "https://drive.google.com/file/d/1lPvVYdwD3CBrGHX4_Wk_4db6Fi_SEFYS/view?usp=sharing",
     },
-  };
-
-  const education = {
-    school: "Stony Brook University",
-    degree: "B.S. in Computer Science",
-    minor: "Minor in Industrial Engineering",
-    graduation: "Expected Aug 2027",
-    location: "Stony Brook, NY",
-    coursework: [
-      "Computer Vision",
-      "System Fundamentals",
-      "Analysis of Algorithms",
-    ],
-    honors: ["Dean's List"],
   };
 
   const skills = {
@@ -164,9 +152,10 @@ export default function MastraStylePortfolio() {
       title: "XR / OCT Volumetric Viewer",
       desc: "Built an XR visualization system for volumetric OCT data using Unity, enabling real-time gaze-driven interaction and volumetric slicing. Designed data pipelines bridging raw 3D medical imaging data and interactive visualization, improving rendering performance and enabling real-time interaction with high-resolution volumes.",
       tags: ["Unity", "XR", "Real-time Rendering", "OCT", "3D Systems"],
+      icon: <Layers className="h-8 w-8 text-white/80" />,
       href: "#",
       featured: true,
-      date: "Oct 2025 – Present",
+      date: "Oct 2025 – Apr 2026",
       links: {
         github: "#",
         demo: "#",
@@ -177,6 +166,7 @@ export default function MastraStylePortfolio() {
       title: "Edge-Optimized CCTV Analytics System",
       desc: "Designed an edge-based video analytics pipeline for real-time object detection, focusing on reducing inference latency under constrained network environments. Implemented computer vision models and system-level optimizations to reduce bandwidth usage and improve end-to-end responsiveness by analyzing trade-offs between edge and server-side inference.",
       tags: ["PyTorch", "YOLOv8", "Edge Computing", "Computer Vision"],
+      icon: <Search className="h-8 w-8 text-white/80" />,
       href: "#",
       featured: true,
       date: "June 2025",
@@ -188,9 +178,27 @@ export default function MastraStylePortfolio() {
       title: "EmoAI – Emotion-Aware Translation System",
       desc: "Developed an AI-powered emotion-aware translation system that analyzes speaker tone and emotional context to generate real-time, contextually aligned translations. Combines speech recognition with emotion analysis to provide emotionally-intelligent language translation.",
       tags: ["AI", "NLP", "Emotion Recognition", "Translation"],
+      icon: <Cpu className="h-8 w-8 text-white/80" />,
       href: "#",
       featured: true,
       date: "June 2025",
+      links: {
+        github: "https://github.com/EmoAI-Translator/EmoAI-Translator.git",
+      },
+    },
+    {
+      title: "VisionQuant - Satellite-based Quantitative Analysis",
+      desc: "Built VisionQuant, a satellite-based alternative data pipeline using YOLOv11 object detection on Sentinel-2 satellite imagery to quantify cargo activity at Memphis FedEx Hub and Louisville UPS Hub. FDX satellite strategy returned +24.6% vs SPY +18.3%. UPS correlation: r=0.443, p<0.001.",
+      tags: [
+        "AI",
+        "Computer Vision",
+        "Satellite Imagery",
+        "Quantitative Analysis",
+      ],
+      icon: <Satellite className="h-8 w-8 text-white/80" />,
+      href: "#",
+      featured: true,
+      date: "Mar 2026",
       links: {
         github: "https://github.com/EmoAI-Translator/EmoAI-Translator.git",
       },
@@ -200,9 +208,9 @@ export default function MastraStylePortfolio() {
   const experience = [
     {
       role: "Undergraduate Research Assistant",
-      org: "CVC Lab, Stony Brook University",
+      org: "Center for Visual Computing, Stony Brook University",
       location: "Stony Brook, NY",
-      period: "Oct 2025 – Present",
+      period: "Oct 2025 – Apr 2026",
       bullets: [
         "Built an XR visualization system for volumetric OCT data using Unity, enabling real-time gaze-driven interaction and volumetric slicing, reducing manual data curation for researchers",
         "Designed data pipelines bridging raw 3D medical imaging data and interactive visualization, improving rendering performance and enabling real-time interaction with high-resolution volumes",
@@ -240,6 +248,11 @@ export default function MastraStylePortfolio() {
       )
     : projects;
 
+  const visibleProjects = showAllProjects
+    ? filteredProjects
+    : filteredProjects.slice(0, 3);
+  const hasMoreProjects = filteredProjects.length > 3;
+
   return (
     <div className="min-h-screen bg-[#07070a] text-white">
       {/* Background: subtle grid + vignette */}
@@ -269,7 +282,6 @@ export default function MastraStylePortfolio() {
 
           <nav className="hidden items-center gap-1 md:flex">
             <NavLink href="#projects">Projects</NavLink>
-            <NavLink href="#education">Education</NavLink>
             <NavLink href="#experience">Experience</NavLink>
             <NavLink href="#contact">Contact</NavLink>
           </nav>
@@ -394,7 +406,10 @@ export default function MastraStylePortfolio() {
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
               <input
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  setShowAllProjects(false);
+                }}
                 placeholder="Search…"
                 className="w-full rounded-2xl border border-white/10 bg-white/5 py-2 pl-9 pr-3 text-sm text-white placeholder:text-white/40 outline-none transition focus:border-white/20"
               />
@@ -402,8 +417,8 @@ export default function MastraStylePortfolio() {
           </div>
 
           <div className="space-y-6">
-            {filteredProjects.map((p, idx) => (
-              <Card key={p.title} className="group/project">
+            {visibleProjects.map((p, idx) => (
+              <Card key={`${p.title}-${idx}`} className="group/project">
                 <div className="flex flex-col gap-6 md:flex-row md:gap-8">
                   {/* Project Thumbnail */}
                   <div className="flex-shrink-0">
@@ -412,14 +427,8 @@ export default function MastraStylePortfolio() {
                         {p.featured ? (
                           <div className="flex flex-col items-center gap-3">
                             <div className="rounded-2xl border border-white/20 bg-white/10 p-4 backdrop-blur">
-                              {idx === 0 && (
-                                <Layers className="h-8 w-8 text-white/80" />
-                              )}
-                              {idx === 1 && (
-                                <Search className="h-8 w-8 text-white/80" />
-                              )}
-                              {idx === 2 && (
-                                <Cpu className="h-8 w-8 text-white/80" />
+                              {p.icon ?? (
+                                <Code2 className="h-8 w-8 text-white/80" />
                               )}
                             </div>
                             <div className="text-xs text-white/50">
@@ -499,77 +508,23 @@ export default function MastraStylePortfolio() {
             ))}
           </div>
 
+          {hasMoreProjects && (
+            <div className="mt-6 flex justify-center">
+              <button
+                type="button"
+                onClick={() => setShowAllProjects((prev) => !prev)}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-white/80 transition hover:bg-white/10"
+              >
+                {showAllProjects ? "Show less" : "Show more"}
+              </button>
+            </div>
+          )}
+
           {filteredProjects.length === 0 && (
             <div className="py-12 text-center text-white/50">
               No projects found matching "{query}"
             </div>
           )}
-        </Section>
-
-        {/* Education */}
-        <Section
-          id="education"
-          title="Education"
-          kicker="Academic background & achievements"
-        >
-          <Card>
-            <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
-              <div className="flex-1">
-                <div className="flex items-start gap-4">
-                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5">
-                    <Sparkles className="h-6 w-6" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold">
-                      {education.school}
-                    </h3>
-                    <p className="mt-1 text-sm text-white/70">
-                      {education.degree}
-                    </p>
-                    <p className="text-sm text-white/60">{education.minor}</p>
-                  </div>
-                </div>
-
-                <div className="mt-6 grid gap-4 md:grid-cols-2">
-                  <div>
-                    <div className="text-xs font-semibold uppercase tracking-wide text-white/50">
-                      Relevant Coursework
-                    </div>
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {education.coursework.map((course) => (
-                        <Pill key={course}>{course}</Pill>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-xs font-semibold uppercase tracking-wide text-white/50">
-                      Honors & Awards
-                    </div>
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {education.honors.map((honor) => (
-                        <span
-                          key={honor}
-                          className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/80"
-                        >
-                          <span>🏆</span>
-                          {honor}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-2 text-right">
-                <div className="text-sm font-semibold text-white/80">
-                  {education.location}
-                </div>
-                <div className="text-sm text-white/60">
-                  {education.graduation}
-                </div>
-              </div>
-            </div>
-          </Card>
         </Section>
 
         {/* Skills */}
