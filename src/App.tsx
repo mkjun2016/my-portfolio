@@ -201,7 +201,7 @@ export default function MastraStylePortfolio() {
       featured: true,
       date: "Mar 2026",
       links: {
-        github: "https://github.com/EmoAI-Translator/EmoAI-Translator.git",
+        github: "https://github.com/mkjun2016/VisionQuant-Datathon.git",
       },
     },
   ];
