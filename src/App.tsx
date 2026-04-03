@@ -41,6 +41,20 @@ interface NavLinkProps {
   children: React.ReactNode;
 }
 
+type YutSide = "front" | "back";
+
+interface YutThrowResult {
+  sticks: YutSide[];
+  name: "Do" | "Gae" | "Geol" | "Yut" | "Mo" | "Back Do";
+  score: number;
+  layout: Array<{
+    x: number;
+    y: number;
+    rotate: number;
+    scale: number;
+  }>;
+}
+
 const TAGS = [
   "XR",
   "Computer Vision",
@@ -104,7 +118,61 @@ const NavLink = ({ href, children }: NavLinkProps) => (
 export default function MastraStylePortfolio() {
   const [query, setQuery] = useState("");
   const [showAllProjects, setShowAllProjects] = useState(false);
+  const [yutResult, setYutResult] = useState<YutThrowResult | null>(null);
+  const [throwCount, setThrowCount] = useState(0);
   const profileImageSrc = `${import.meta.env.BASE_URL}profile.jpeg`;
+
+  const defaultYutLayout = [
+    { x: 35, y: 36, rotate: -34, scale: 1 },
+    { x: 44, y: 62, rotate: 18, scale: 1 },
+    { x: 60, y: 60, rotate: 26, scale: 1 },
+    { x: 68, y: 38, rotate: -20, scale: 1 },
+  ];
+
+  const throwYut = () => {
+    // Stick index 0 is treated as the marked stick used for Back Do.
+    const sticks: YutSide[] = Array.from({ length: 4 }, () =>
+      Math.random() < 0.5 ? "front" : "back",
+    );
+    const frontCount = sticks.filter((side) => side === "front").length;
+    const isBackDo = frontCount === 1 && sticks[0] === "back";
+
+    let name: YutThrowResult["name"] = "Do";
+    if (frontCount === 0) name = "Mo";
+    if (frontCount === 1) name = isBackDo ? "Back Do" : "Do";
+    if (frontCount === 2) name = "Gae";
+    if (frontCount === 3) name = "Geol";
+    if (frontCount === 4) name = "Yut";
+
+    const clamp = (value: number, min: number, max: number) =>
+      Math.min(Math.max(value, min), max);
+
+    // Spread sticks to random directions while keeping each one inside the board.
+    const baseAngle = Math.random() * 360;
+    const sectorOrder = [0, 90, 180, 270].sort(() => Math.random() - 0.5);
+    const layout = sectorOrder.map((sectorAngle) => {
+      const angleDeg = baseAngle + sectorAngle + (-20 + Math.random() * 40);
+      const angleRad = (angleDeg * Math.PI) / 180;
+      const radius = 12 + Math.random() * 10;
+      const offsetX = Math.cos(angleRad) * radius;
+      const offsetY = Math.sin(angleRad) * radius * 0.65;
+
+      return {
+        x: clamp(50 + offsetX, 28, 72),
+        y: clamp(50 + offsetY, 10, 30),
+        rotate: -58 + Math.random() * 116,
+        scale: 0.95 + Math.random() * 0.12,
+      };
+    });
+
+    setYutResult({
+      sticks,
+      name,
+      score: isBackDo ? -1 : frontCount === 0 ? 5 : frontCount,
+      layout,
+    });
+    setThrowCount((prev) => prev + 1);
+  };
 
   // ===== Customize these =====
   const profile = {
@@ -689,6 +757,149 @@ export default function MastraStylePortfolio() {
 
               <div className="mt-6 text-xs text-white/50">
                 © {new Date().getFullYear()} {profile.name}
+              </div>
+            </Card>
+          </div>
+        </Section>
+
+        {/* Yutnori mini game */}
+        <Section
+          id="yutnori"
+          title="Quick Yut Toss"
+          kicker="Play Traditional Korean Game!"
+        >
+          <div className="mx-auto max-w-3xl">
+            <Card>
+              <div className="flex flex-col gap-5">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-sm text-white/70">
+                    Toss the sticks and see how they land. Marked stick enables
+                    Back Do.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={throwYut}
+                    className="inline-flex items-center justify-center rounded-xl bg-white px-4 py-2 text-sm font-semibold text-black transition hover:opacity-90"
+                  >
+                    Throw Yut
+                  </button>
+                </div>
+
+                <div className="relative h-72 overflow-hidden rounded-2xl border border-white/10 bg-[radial-gradient(circle_at_20%_15%,rgba(255,255,255,0.08),transparent_40%),radial-gradient(circle_at_80%_70%,rgba(255,255,255,0.06),transparent_42%),linear-gradient(145deg,rgba(255,255,255,0.06),rgba(255,255,255,0.01))]">
+                  <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[size:30px_30px] opacity-25" />
+                  {(
+                    yutResult?.sticks ?? Array.from({ length: 4 }, () => "back")
+                  ).map((side, index) => {
+                    const isFront = side === "front";
+                    const isMarkedStick = index === 0;
+                    const layout =
+                      yutResult?.layout[index] ?? defaultYutLayout[index];
+
+                    return (
+                      <motion.div
+                        key={`${throwCount}-${index}`}
+                        initial={{
+                          left: "50%",
+                          top: "50%",
+                          rotate: 0,
+                          scale: 0.8,
+                          opacity: 0,
+                        }}
+                        animate={{
+                          left: `${layout.x}%`,
+                          top: `${layout.y}%`,
+                          rotate: layout.rotate,
+                          scale: layout.scale,
+                          opacity: 1,
+                        }}
+                        transition={{
+                          duration: 0.55,
+                          delay: index * 0.06,
+                          type: "spring",
+                          stiffness: 170,
+                          damping: 14,
+                        }}
+                        className="absolute -translate-x-1/2 -translate-y-1/2"
+                        style={{ zIndex: index + 1 }}
+                      >
+                        <div
+                          className={`relative h-36 w-11 rounded-[999px] border shadow-[0_14px_24px_rgba(0,0,0,0.45)] sm:h-40 sm:w-12 ${
+                            isFront
+                              ? "border-[#8a5a2a]/80 bg-gradient-to-b from-[#d6b785] via-[#b98a55] to-[#7a4e26]"
+                              : "border-[#c8b487]/80 bg-gradient-to-b from-[#f0e2bd] via-[#e7d7af] to-[#cfbb8d]"
+                          }`}
+                        >
+                          <div className="pointer-events-none absolute inset-x-[18%] top-3 h-[1px] bg-white/35" />
+                          <div className="pointer-events-none absolute inset-x-[22%] bottom-3 h-[1px] bg-black/25" />
+
+                          {isFront ? (
+                            <div className="absolute inset-0 flex flex-col items-center justify-center gap-5">
+                              {Array.from({ length: 3 }).map((_, markIndex) => (
+                                <div
+                                  key={markIndex}
+                                  className="relative h-4 w-4 opacity-85"
+                                >
+                                  <span className="absolute left-1/2 top-1/2 h-[2px] w-4 -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-full bg-[#4f3017]" />
+                                  <span className="absolute left-1/2 top-1/2 h-[2px] w-4 -translate-x-1/2 -translate-y-1/2 -rotate-45 rounded-full bg-[#4f3017]" />
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="pointer-events-none absolute inset-0 opacity-60">
+                              <span className="absolute left-[30%] top-[22%] h-[1px] w-7 rotate-6 bg-[#b59766]/75" />
+                              <span className="absolute left-[22%] top-[38%] h-[1px] w-8 -rotate-3 bg-[#b59766]/75" />
+                              <span className="absolute left-[28%] top-[54%] h-[1px] w-6 rotate-12 bg-[#b59766]/75" />
+                              <span className="absolute left-[26%] top-[70%] h-[1px] w-8 -rotate-8 bg-[#b59766]/75" />
+                            </div>
+                          )}
+
+                          {isMarkedStick && (
+                            <div className="absolute right-1 top-1 rounded-full border border-black/20 bg-black/25 px-1.5 py-0.5 text-[10px] font-semibold text-white/90">
+                              M
+                            </div>
+                          )}
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+
+                  {!yutResult && (
+                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full border border-white/15 bg-black/40 px-3 py-1 text-xs text-white/70">
+                      Click Throw Yut to toss
+                    </div>
+                  )}
+                </div>
+
+                <div className="rounded-xl border border-white/10 bg-black/20 px-4 py-3">
+                  {yutResult ? (
+                    <div className="flex flex-wrap items-center gap-3 text-sm">
+                      <span className="text-white/60">Result</span>
+                      <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 font-semibold text-white">
+                        {yutResult.name}
+                      </span>
+                      <span className="text-white/60">Score</span>
+                      <span className="font-semibold text-white/90">
+                        {yutResult.score}
+                      </span>
+                      <span className="text-white/40">|</span>
+                      <span className="text-white/60">
+                        {yutResult.sticks.map((side, idx) => (
+                          <span
+                            key={`${side}-${idx}`}
+                            className="mr-2 inline-block"
+                          >
+                            S{idx + 1}:{side === "front" ? "F" : "B"}
+                            {idx === 0 ? "*" : ""}
+                          </span>
+                        ))}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="text-sm text-white/50">
+                      No throw yet. Press "Throw Yut".
+                    </div>
+                  )}
+                </div>
               </div>
             </Card>
           </div>
