@@ -148,7 +148,7 @@ export const projects: Entry[] = [
     title: "EmoAI — Emotion-Aware Translation",
     date: "Jun 2025",
     desc: "Real-time translation that carries the speaker's tone and emotional context.",
-    badge: "2nd Place · WolfieTank",
+    badge: "2nd Place · WolfieTank 2025",
     tags: ["NLP", "Speech", "Emotion Recognition"],
     href: "https://github.com/EmoAI-Translator/EmoAI-Translator",
     icon: Languages,
@@ -159,7 +159,7 @@ export const awards: { title: string; detail: string; date?: string }[] = [
   { title: "SUNY Korea 2026 Research Challenge", detail: "Dean's Award · Ask, Don't Align", date: "Nov 2026" },
   { title: "3rd Annual SFM Healthcare Innovation Challenge", detail: "CS Prize · ReChord", date: "Apr 2026" },
   { title: "SBU Datathon 2026", detail: "1st Place, Finance & Economics Track · VisionQuant", date: "Feb 2026" },
-  { title: "WolfieTank", detail: "2nd Place · EmoAI" },
+  { title: "WolfieTank", detail: "2nd Place · EmoAI", date: "Oct 2025" },
   { title: "The Contribution Project", detail: "Grant Recipient" },
 ];
 
