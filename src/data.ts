@@ -13,6 +13,8 @@ export interface Entry {
   tags?: string[];
   /** Repository or project link. */
   href?: string;
+  /** Poster PDF link. */
+  poster?: string;
   /** Short monogram shown in the logo tile when there is no logo image. */
   mark?: string;
   /** Logo image path inside /public, e.g. "logos/sbu.png". Overrides `mark`. */
@@ -69,6 +71,7 @@ export const research: Entry[] = [
     sub: "Advised by Prof. Francois Rameau",
     desc: "Ask, Don't Align: robots exchange detector-verified text queries instead of aligning maps, matching map-sharing accuracy at 1/20 of the bytes.",
     badge: "Dean's Award · SUNY Korea 2026 Research Challenge",
+    poster: "https://drive.google.com/file/d/1EQv9zJ8bk_JbdhoqDnPTHrOknpGRpgfV/view?usp=sharing",
     mark: "SIL",
   },
   {

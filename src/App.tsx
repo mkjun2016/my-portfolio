@@ -256,7 +256,7 @@ function EntryList({ items }: { items: Entry[] }) {
               {item.role && <p className="mt-0.5 font-medium text-accent">{item.role}</p>}
               {item.sub && <p className="text-[14.5px] text-muted">{item.sub}</p>}
               {item.desc && <p className="mt-1 max-w-[64ch] text-[14.5px]">{item.desc}</p>}
-              {(item.badge || item.tags || item.href) && (
+              {(item.badge || item.tags || item.href || item.poster) && (
                 <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1.5">
                   {item.badge && (
                     <span className="rounded-md bg-accent-soft px-2.5 py-0.5 text-[13.5px] font-semibold text-accent">
@@ -275,6 +275,17 @@ function EntryList({ items }: { items: Entry[] }) {
                     >
                       <Github className="h-3.5 w-3.5" aria-hidden="true" />
                       Code
+                    </a>
+                  )}
+                  {item.poster && (
+                    <a
+                      href={item.poster}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="link inline-flex items-center gap-1 text-sm font-medium"
+                    >
+                      <FileText className="h-3.5 w-3.5" aria-hidden="true" />
+                      Poster
                     </a>
                   )}
                 </div>
