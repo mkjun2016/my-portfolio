@@ -15,7 +15,6 @@ import {
   PenLine,
   Sun,
   User,
-  Wrench,
   X,
   type LucideIcon,
 } from "lucide-react";
@@ -28,7 +27,6 @@ import {
   profile,
   projects,
   research,
-  skills,
   type Entry,
 } from "./data";
 
@@ -41,7 +39,6 @@ const NAV = [
   { id: "experience", label: "Experience" },
   { id: "projects", label: "Projects" },
   { id: "awards", label: "Awards" },
-  { id: "skills", label: "Skills" },
 ];
 
 const asset = (path: string) => `${import.meta.env.BASE_URL}${path}`;
@@ -498,22 +495,6 @@ export default function App() {
               </li>
             ))}
           </ul>
-        </Section>
-
-        <Section id="skills" icon={Wrench} title="Skills">
-          <dl className="grid gap-2">
-            {skills.map(({ label, items }, i) => (
-              <div
-                key={label}
-                data-reveal
-                style={{ transitionDelay: `${i * 70}ms` }}
-                className="grid gap-0.5 sm:grid-cols-[130px_1fr] sm:gap-6"
-              >
-                <dt className="pt-[3px] font-mono text-[13px] font-medium text-muted">{label}</dt>
-                <dd>{items.join(", ")}</dd>
-              </div>
-            ))}
-          </dl>
         </Section>
       </main>
 

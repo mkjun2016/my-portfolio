@@ -21,7 +21,7 @@ export interface Entry {
 }
 
 export const profile = {
-  handle: "mkjun2016",
+  handle: "mkjun2004",
   name: "Moonkyu (Kevin) Jun",
   eyebrow: "Computer Vision · Physical AI · Medical Imaging",
   photo: "profile.jpeg",
@@ -161,21 +161,4 @@ export const awards: { title: string; detail: string; date?: string }[] = [
   { title: "SBU Datathon 2026", detail: "1st Place, Finance & Economics Track · VisionQuant", date: "Feb 2026" },
   { title: "WolfieTank", detail: "2nd Place · EmoAI", date: "Oct 2025" },
   { title: "The Contribution Project", detail: "Grant Recipient" },
-];
-
-export const skills: { label: string; items: string[] }[] = [
-  { label: "Languages", items: ["Python", "C/C++", "JavaScript", "TypeScript"] },
-  {
-    label: "ML / CV",
-    items: [
-      "PyTorch",
-      "YOLOv8/v11",
-      "OpenCV",
-      "Semi-supervised Learning",
-      "3D Reconstruction",
-      "Volumetric Segmentation",
-    ],
-  },
-  { label: "Platforms", items: ["Docker (MSA)", "FastAPI", "MongoDB", "React", "React Native"] },
-  { label: "XR / Graphics", items: ["Unity", "GPU Rendering", "HMD Volumetric Rendering"] },
 ];
