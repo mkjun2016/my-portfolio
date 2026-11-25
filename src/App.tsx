@@ -1,1095 +1,540 @@
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useRef, useState, type MouseEvent, type ReactNode } from "react";
 import {
-  ArrowRight,
+  Award,
+  Briefcase,
+  FileText,
+  FlaskConical,
+  FolderGit2,
   Github,
+  GraduationCap,
   Linkedin,
   Mail,
-  ExternalLink,
-  Sparkles,
-  Code2,
-  FlaskConical,
-  Layers,
-  Cpu,
-  Search,
-  Satellite,
+  Megaphone,
+  Menu,
+  Moon,
+  PenLine,
+  Sun,
+  User,
+  Wrench,
+  X,
+  type LucideIcon,
 } from "lucide-react";
+import NeuralNet from "./components/NeuralNet";
+import {
+  awards,
+  education,
+  experience,
+  news,
+  profile,
+  projects,
+  research,
+  skills,
+  type Entry,
+} from "./data";
 
-/**
- * Mastra.ai-inspired portfolio landing page (dark, bold headline, subtle grid, glossy cards).
- * Drop this into a Next.js page (app/page.tsx) or any React app with Tailwind.
- */
-
-interface SectionProps {
-  id: string;
-  title: string;
-  kicker?: string;
-  children: React.ReactNode;
-}
-
-interface PillProps {
-  children: React.ReactNode;
-}
-
-interface CardProps {
-  children: React.ReactNode;
-  className?: string;
-}
-
-interface NavLinkProps {
-  href: string;
-  children: React.ReactNode;
-}
-
-type YutSide = "front" | "back";
-
-interface YutThrowResult {
-  sticks: YutSide[];
-  name: "Do" | "Gae" | "Geol" | "Yut" | "Mo" | "Back Do";
-  score: number;
-  layout: Array<{
-    x: number;
-    y: number;
-    rotate: number;
-    scale: number;
-  }>;
-}
-
-const TAGS = [
-  "XR",
-  "Computer Vision",
-  "Unity",
-  "TypeScript",
-  "Python",
-  "FastAPI",
-  "React",
-  "Vision Pro",
+// Page order: the active-section highlight relies on it.
+const NAV = [
+  { id: "about", label: "About" },
+  { id: "news", label: "News" },
+  { id: "education", label: "Education" },
+  { id: "research", label: "Research" },
+  { id: "experience", label: "Experience" },
+  { id: "projects", label: "Projects" },
+  { id: "awards", label: "Awards" },
+  { id: "skills", label: "Skills" },
 ];
 
-const HERO_TITLE_LINE_1 = "Build impactful systems";
-const HERO_TITLE_LINE_2 = "from idea to shipped demo.";
+const asset = (path: string) => `${import.meta.env.BASE_URL}${path}`;
+const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-const makeBinaryLine = (length: number) =>
-  Array.from({ length }, () => (Math.random() < 0.5 ? "0" : "1")).join("");
+/* ---------- hooks ---------- */
 
-const scrambleToBinary = (target: string, revealProgress: number) =>
-  target
-    .split("")
-    .map((ch) => {
-      if (ch === " ") return " ";
-      if (ch === "." || ch === ",") return ch;
-      if (Math.random() < revealProgress) return ch;
-      return Math.random() < 0.5 ? "0" : "1";
-    })
-    .join("");
-
-const Section = ({ id, title, kicker, children }: SectionProps) => (
-  <section id={id} className="scroll-mt-24 py-16">
-    <div className="mx-auto max-w-6xl px-6">
-      <div className="mb-8">
-        {kicker && (
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/70">
-            <Sparkles className="h-3.5 w-3.5" />
-            <span>{kicker}</span>
-          </div>
-        )}
-        <h2 className="mt-4 text-2xl font-semibold tracking-tight text-white md:text-3xl">
-          {title}
-        </h2>
-      </div>
-      {children}
-    </div>
-  </section>
-);
-
-const Pill = ({ children }: PillProps) => (
-  <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/80">
-    {children}
-  </span>
-);
-
-const Card = ({ children, className = "" }: CardProps) => (
-  <div
-    className={
-      "group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] shadow-[0_0_0_1px_rgba(255,255,255,0.02),0_30px_80px_rgba(0,0,0,0.65)] " +
-      className
+function useTheme() {
+  const [theme, setTheme] = useState(() =>
+    document.documentElement.dataset.theme === "dark" ? "dark" : "light",
+  );
+  const toggle = () => {
+    const next = theme === "dark" ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    try {
+      localStorage.setItem("theme", next);
+    } catch {
+      /* storage unavailable: theme still applies for this visit */
     }
-  >
-    <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-      <div className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
-      <div className="absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
-    </div>
-    <div className="relative p-6">{children}</div>
-  </div>
-);
+    setTheme(next);
+  };
+  return { theme, toggle };
+}
 
-const NavLink = ({ href, children }: NavLinkProps) => (
-  <a
-    href={href}
-    className="rounded-full px-3 py-2 text-sm text-white/70 transition hover:bg-white/5 hover:text-white"
-  >
-    {children}
-  </a>
-);
-
-export default function MastraStylePortfolio() {
-  const [query, setQuery] = useState("");
-  const [showAllProjects, setShowAllProjects] = useState(false);
-  const [yutResult, setYutResult] = useState<YutThrowResult | null>(null);
-  const [throwCount, setThrowCount] = useState(0);
-  const [showIntro, setShowIntro] = useState(true);
-  const [introFading, setIntroFading] = useState(false);
-  const [heroTitleDone, setHeroTitleDone] = useState(false);
-  const [heroScrambleProgress, setHeroScrambleProgress] = useState(0);
-  const [heroTitleLine1, setHeroTitleLine1] = useState(() =>
-    scrambleToBinary(HERO_TITLE_LINE_1, 0),
-  );
-  const [heroTitleLine2, setHeroTitleLine2] = useState(() =>
-    scrambleToBinary(HERO_TITLE_LINE_2, 0),
-  );
-  const [binaryLines] = useState(() =>
-    Array.from({ length: 14 }, () => makeBinaryLine(64)),
-  );
-  const profileImageSrc = `${import.meta.env.BASE_URL}profile.jpeg`;
-
+/** Highlights the nav item of the section currently under the top bar. */
+function useActiveSection() {
+  const [active, setActive] = useState("");
   useEffect(() => {
-    const fadeTimer = setTimeout(() => setIntroFading(true), 2400);
-    const hideTimer = setTimeout(() => setShowIntro(false), 3000);
-
+    const update = () => {
+      const root = document.documentElement;
+      const atBottom = window.innerHeight + window.scrollY >= root.scrollHeight - 4;
+      let current = "";
+      for (const { id } of NAV) {
+        const el = document.getElementById(id);
+        if (el && el.getBoundingClientRect().top <= 120) current = id;
+      }
+      setActive(atBottom ? NAV[NAV.length - 1].id : current);
+    };
+    const raf = requestAnimationFrame(update);
+    window.addEventListener("scroll", update, { passive: true });
     return () => {
-      clearTimeout(fadeTimer);
-      clearTimeout(hideTimer);
+      cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", update);
     };
   }, []);
+  return active;
+}
+
+/** Fades `[data-reveal]` elements up into place as they enter the viewport. */
+function useReveal() {
+  useEffect(() => {
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (!e.isIntersecting) continue;
+          e.target.classList.add("risen");
+          io.unobserve(e.target);
+        }
+      },
+      { rootMargin: "0px 0px -8% 0px" },
+    );
+    document.querySelectorAll("[data-reveal]").forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, []);
+}
+
+/* ---------- small components ---------- */
+
+function Typed({ text }: { text: string }) {
+  const [shown, setShown] = useState(() => (reducedMotion() ? text : ""));
+  const [typing, setTyping] = useState(false);
 
   useEffect(() => {
-    if (showIntro) return;
-
-    const duration = 3000;
-    const tick = 70;
-    let elapsed = 0;
-
-    const timer = setInterval(() => {
-      elapsed += tick;
-      const progress = Math.min(elapsed / duration, 1);
-      setHeroScrambleProgress(progress);
-
-      setHeroTitleLine1(scrambleToBinary(HERO_TITLE_LINE_1, progress));
-      setHeroTitleLine2(scrambleToBinary(HERO_TITLE_LINE_2, progress));
-
-      if (progress >= 1) {
-        clearInterval(timer);
-        setHeroTitleLine1(HERO_TITLE_LINE_1);
-        setHeroTitleLine2(HERO_TITLE_LINE_2);
-        setHeroScrambleProgress(1);
-        setHeroTitleDone(true);
+    if (reducedMotion()) return;
+    let i = 0;
+    let timer = 0;
+    const type = () => {
+      setTyping(true);
+      i += 1;
+      setShown(text.slice(0, i));
+      if (i < text.length) {
+        timer = window.setTimeout(type, 85 * (0.6 + Math.random() * 0.9));
+      } else {
+        setTyping(false);
+        timer = window.setTimeout(erase, 4000);
       }
-    }, tick);
-
-    return () => clearInterval(timer);
-  }, [showIntro]);
-
-  const defaultYutLayout = [
-    { x: 35, y: 36, rotate: -34, scale: 1 },
-    { x: 44, y: 62, rotate: 18, scale: 1 },
-    { x: 60, y: 60, rotate: 26, scale: 1 },
-    { x: 68, y: 38, rotate: -20, scale: 1 },
-  ];
-
-  const throwYut = () => {
-    // Stick index 0 is treated as the marked stick used for Back Do.
-    const sticks: YutSide[] = Array.from({ length: 4 }, () =>
-      Math.random() < 0.5 ? "front" : "back",
-    );
-    const frontCount = sticks.filter((side) => side === "front").length;
-    const isBackDo = frontCount === 1 && sticks[0] === "back";
-
-    let name: YutThrowResult["name"] = "Do";
-    if (frontCount === 0) name = "Mo";
-    if (frontCount === 1) name = isBackDo ? "Back Do" : "Do";
-    if (frontCount === 2) name = "Gae";
-    if (frontCount === 3) name = "Geol";
-    if (frontCount === 4) name = "Yut";
-
-    const clamp = (value: number, min: number, max: number) =>
-      Math.min(Math.max(value, min), max);
-
-    // Spread sticks to random directions while keeping each one inside the board.
-    const baseAngle = Math.random() * 360;
-    const sectorOrder = [0, 90, 180, 270].sort(() => Math.random() - 0.5);
-    const layout = sectorOrder.map((sectorAngle) => {
-      const angleDeg = baseAngle + sectorAngle + (-20 + Math.random() * 40);
-      const angleRad = (angleDeg * Math.PI) / 180;
-      const radius = 12 + Math.random() * 10;
-      const offsetX = Math.cos(angleRad) * radius;
-      const offsetY = Math.sin(angleRad) * radius * 0.65;
-
-      return {
-        x: clamp(50 + offsetX, 28, 72),
-        y: clamp(50 + offsetY, 10, 30),
-        rotate: -58 + Math.random() * 116,
-        scale: 0.95 + Math.random() * 0.12,
-      };
-    });
-
-    setYutResult({
-      sticks,
-      name,
-      score: isBackDo ? -1 : frontCount === 0 ? 5 : frontCount,
-      layout,
-    });
-    setThrowCount((prev) => prev + 1);
-  };
-
-  // ===== Customize these =====
-  const profile = {
-    name: "Moonkyu (Kevin) Jun",
-    title: "Computer Science @ Stony Brook • XR + Computer Vision Builder",
-    tagline:
-      "B.S. in Computer Science (Minor in Industrial Engineering) • Stony Brook University",
-    location: "Stony Brook, NY",
-    links: {
-      github: "https://github.com/mkjun2016",
-      blog: "https://velog.io/@mkjun2022/posts",
-      linkedin: "https://www.linkedin.com/in/mkjunkevin",
-      email: "mailto:moonkyu.jun@stonybrook.edu",
-      resume:
-        "https://drive.google.com/file/d/1lPvVYdwD3CBrGHX4_Wk_4db6Fi_SEFYS/view?usp=sharing",
-    },
-  };
-
-  const skills = {
-    languages: ["Python", "C/C++", "JavaScript", "TypeScript"],
-    mlcv: ["PyTorch", "YOLOv8", "Applied Computer Vision Pipelines"],
-    platforms: ["Docker", "FastAPI", "MongoDB", "React.js", "React Native"],
-    xr: ["Unity", "Real-time Rendering", "Interactive 3D Systems"],
-  };
-
-  const highlights = [
-    {
-      icon: <Layers className="h-5 w-5" />,
-      title: "XR volumetric visualization",
-      body: "Built interactive OCT volume rendering prototypes with custom shaders and gaze/pinch interactions.",
-    },
-    {
-      icon: <Cpu className="h-5 w-5" />,
-      title: "Computer vision systems",
-      body: "Shipped inspection/analysis features across frontend + backend, focusing on performance and reliability.",
-    },
-    {
-      icon: <Code2 className="h-5 w-5" />,
-      title: "Product-minded engineering",
-      body: "I like turning messy ideas into clean UX with measurable outcomes and iteration loops.",
-    },
-  ];
-
-  const projects = [
-    {
-      title: "XR / OCT Volumetric Viewer",
-      desc: "Built an XR visualization system for volumetric OCT data using Unity, enabling real-time gaze-driven interaction and volumetric slicing. Designed data pipelines bridging raw 3D medical imaging data and interactive visualization, improving rendering performance and enabling real-time interaction with high-resolution volumes.",
-      tags: ["Unity", "XR", "Real-time Rendering", "OCT", "3D Systems"],
-      icon: <Layers className="h-8 w-8 text-white/80" />,
-      href: "#",
-      featured: true,
-      date: "Oct 2025 – Apr 2026",
-      links: {
-        github: "#",
-        demo: "#",
-        paper: "#",
-      },
-    },
-    {
-      title: "Edge-Optimized CCTV Analytics System",
-      desc: "Designed an edge-based video analytics pipeline for real-time object detection, focusing on reducing inference latency under constrained network environments. Implemented computer vision models and system-level optimizations to reduce bandwidth usage and improve end-to-end responsiveness by analyzing trade-offs between edge and server-side inference.",
-      tags: ["PyTorch", "YOLOv8", "Edge Computing", "Computer Vision"],
-      icon: <Search className="h-8 w-8 text-white/80" />,
-      href: "#",
-      featured: true,
-      date: "June 2025",
-      links: {
-        github: "https://github.com/mkjun2016/edge-opt-cctv.git",
-      },
-    },
-    {
-      title: "EmoAI – Emotion-Aware Translation System",
-      desc: "Developed an AI-powered emotion-aware translation system that analyzes speaker tone and emotional context to generate real-time, contextually aligned translations. Combines speech recognition with emotion analysis to provide emotionally-intelligent language translation.",
-      tags: ["AI", "NLP", "Emotion Recognition", "Translation"],
-      icon: <Cpu className="h-8 w-8 text-white/80" />,
-      href: "#",
-      featured: true,
-      date: "June 2025",
-      links: {
-        github: "https://github.com/EmoAI-Translator/EmoAI-Translator.git",
-      },
-    },
-    {
-      title: "VisionQuant - Satellite-based Quantitative Analysis",
-      desc: "Built VisionQuant, a satellite-based alternative data pipeline using YOLOv11 object detection on Sentinel-2 satellite imagery to quantify cargo activity at Memphis FedEx Hub and Louisville UPS Hub. FDX satellite strategy returned +24.6% vs SPY +18.3%. UPS correlation: r=0.443, p<0.001.",
-      tags: [
-        "AI",
-        "Computer Vision",
-        "Satellite Imagery",
-        "Quantitative Analysis",
-      ],
-      icon: <Satellite className="h-8 w-8 text-white/80" />,
-      href: "#",
-      featured: true,
-      date: "Mar 2026",
-      links: {
-        github: "https://github.com/mkjun2016/VisionQuant-Datathon.git",
-      },
-    },
-  ];
-
-  const experience = [
-    {
-      role: "Undergraduate Research Assistant",
-      org: "Center for Visual Computing, Stony Brook University",
-      location: "Stony Brook, NY",
-      period: "Oct 2025 – Apr 2026",
-      bullets: [
-        "Built an XR visualization system for volumetric OCT data using Unity, enabling real-time gaze-driven interaction and volumetric slicing, reducing manual data curation for researchers",
-        "Designed data pipelines bridging raw 3D medical imaging data and interactive visualization, improving rendering performance and enabling real-time interaction with high-resolution volumes",
-      ],
-    },
-    {
-      role: "Full Stack Developer Intern",
-      org: "MarkCloud Co., Ltd.",
-      location: "Seoul, Korea",
-      period: "Apr 2025 – June 2025",
-      bullets: [
-        "Developed an AI-powered defect analysis interface using React.js and YOLOv8, enabling real-time visual QA and improving defect detection efficiency for automotive inspection workflows",
-        "Led backend system design using FastAPI and MongoDB for an OCR-based ad compliance platform in collaboration with Industrial Bank of Korea, supporting enterprise-scale data processing and regulatory validation",
-        "Built enterprise-grade groupware and containerized services using Docker, supporting MSA-based deployment and improving system scalability and maintainability",
-      ],
-    },
-    {
-      role: "Frontend Developer Intern",
-      org: "J&J Tech Inc.",
-      location: "Incheon, Korea",
-      period: "July 2023 – Sep 2023",
-      bullets: [
-        'Developed and launched "YakManager Global," a cross-platform pharmacy app using React Native, scaling to 50K+ global users with high performance and reliability',
-        "Built scalable UI/UX components with multi-language support and API integrations, improving responsiveness and usability across iOS and Android platforms",
-        "Led overseas usability testing, identified latency issues caused by Naver Cloud infrastructure, and proposed AWS migration to improve international performance and scalability",
-      ],
-    },
-  ];
-
-  const filteredProjects = query.trim()
-    ? projects.filter((p) =>
-        [p.title, p.desc, ...(p.tags || [])].some((s) =>
-          String(s).toLowerCase().includes(query.trim().toLowerCase()),
-        ),
-      )
-    : projects;
-
-  const visibleProjects = showAllProjects
-    ? filteredProjects
-    : filteredProjects.slice(0, 3);
-  const hasMoreProjects = filteredProjects.length > 3;
+    };
+    const erase = () => {
+      setTyping(true);
+      i -= 1;
+      setShown(text.slice(0, i));
+      if (i > 0) {
+        timer = window.setTimeout(erase, 40);
+      } else {
+        setTyping(false);
+        timer = window.setTimeout(type, 700);
+      }
+    };
+    timer = window.setTimeout(type, 600);
+    return () => window.clearTimeout(timer);
+  }, [text]);
 
   return (
-    <div className="min-h-screen bg-[#07070a] text-white">
-      {/* Background: subtle grid + vignette */}
-      <div className="pointer-events-none fixed inset-0">
-        <div
-          className="absolute inset-0 opacity-30"
-          style={{
-            backgroundImage:
-              "linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px)",
-            backgroundSize: "64px 64px",
-          }}
-        />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.08),transparent_55%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(255,255,255,0.06),transparent_55%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,transparent_20%,rgba(0,0,0,0.8)_80%)]" />
-      </div>
+    <p className="mb-2.5 font-mono text-[13px] font-medium tracking-[0.02em] text-accent">
+      <span className="sr-only">{text}</span>
+      <span aria-hidden="true">
+        <span className="text-muted">&gt; </span>
+        {shown}
+        <span className={`caret ${typing ? "" : "blink"}`} />
+      </span>
+    </p>
+  );
+}
 
-      {showIntro && (
-        <div
-          className={`fixed inset-0 z-[90] flex items-center justify-center bg-[#040407]/95 transition-opacity duration-700 ${
-            introFading ? "opacity-0" : "opacity-100"
-          }`}
-        >
-          <div className="relative mx-auto w-[92%] max-w-5xl overflow-hidden rounded-3xl border border-white/10 bg-black/50 px-6 py-8 backdrop-blur md:px-10 md:py-10">
-            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[size:22px_22px] opacity-40" />
-            <div className="relative space-y-2 font-mono text-[10px] leading-relaxed text-emerald-300/70 md:text-xs">
-              {binaryLines.map((line, idx) => (
-                <motion.div
-                  key={`${line}-${idx}`}
-                  initial={{ opacity: 0, x: -14 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.22, delay: idx * 0.045 }}
-                  className="whitespace-nowrap"
-                >
-                  {line}
-                </motion.div>
-              ))}
-            </div>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.4, delay: 0.45 }}
-              className="relative mt-6 flex items-center gap-2 font-mono text-sm text-white/85"
-            >
-              <span>system.boot("portfolio")</span>
-              <span className="h-4 w-[2px] animate-pulse bg-white/70" />
-            </motion.div>
-          </div>
-        </div>
-      )}
+interface ChipProps {
+  href: string;
+  icon: LucideIcon;
+  label: string;
+  onClick?: (e: MouseEvent<HTMLAnchorElement>) => void;
+}
 
-      <div
-        className={`transition-opacity duration-700 ${
-          showIntro ? "opacity-0" : "opacity-100"
-        }`}
+function Chip({ href, icon: Icon, label, onClick }: ChipProps) {
+  const external = href.startsWith("http");
+  return (
+    <li>
+      <a
+        href={href}
+        title={label}
+        onClick={onClick}
+        target={external ? "_blank" : undefined}
+        rel={external ? "noreferrer" : undefined}
+        className="inline-flex h-11 w-11 items-center justify-center gap-[7px] rounded-full border border-line bg-surface text-sm font-medium text-fg transition hover:-translate-y-0.5 hover:border-accent hover:text-accent md:h-auto md:w-auto md:px-[15px] md:py-2"
       >
-        {/* Top Nav */}
-        <header className="sticky top-0 z-50 border-b border-white/10 bg-[#07070a]/70 backdrop-blur">
-          <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-            <a
-              href="#"
-              className="flex items-center gap-2 text-sm font-semibold"
-            >
-              <span className="inline-flex h-7 w-7 items-center justify-center rounded-xl border border-white/10 bg-white/5">
-                <Sparkles className="h-4 w-4" />
-              </span>
-              <span className="text-white/90">{profile.name}</span>
-            </a>
+        <Icon className="h-[19px] w-[19px] md:h-4 md:w-4" strokeWidth={1.8} aria-hidden="true" />
+        <span className="sr-only md:not-sr-only md:whitespace-nowrap">{label}</span>
+      </a>
+    </li>
+  );
+}
 
-            <nav className="hidden items-center gap-1 md:flex">
-              <NavLink href="#projects">Projects</NavLink>
-              <NavLink href="#experience">Experience</NavLink>
-              <NavLink href="#contact">Contact</NavLink>
-            </nav>
+function Section({
+  id,
+  icon: Icon,
+  title,
+  children,
+}: {
+  id: string;
+  icon: LucideIcon;
+  title: string;
+  children: ReactNode;
+}) {
+  return (
+    <section id={id} className="border-t border-line py-9">
+      <h2
+        data-reveal
+        className="mb-[22px] flex items-center gap-3 text-[21px] font-bold tracking-[-0.02em]"
+      >
+        <span
+          aria-hidden="true"
+          className="grid h-8 w-8 shrink-0 place-items-center rounded-[9px] bg-accent-soft text-accent"
+        >
+          <Icon className="h-[18px] w-[18px]" strokeWidth={1.9} />
+        </span>
+        {title}
+      </h2>
+      {children}
+    </section>
+  );
+}
 
-            <div className="flex items-center gap-2">
-              <a
-                href={profile.links.github}
-                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/80 transition hover:bg-white/10"
-                target="_blank"
-                rel="noreferrer"
-              >
-                <Github className="h-4 w-4" />
-                <span className="hidden sm:inline">GitHub</span>
-              </a>
-              <a
-                href={profile.links.blog}
-                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/80 transition hover:bg-white/10"
-                target="_blank"
-                rel="noreferrer"
-              >
-                <ExternalLink className="h-4 w-4" />
-                <span className="hidden sm:inline">Blog</span>
-              </a>
-              <a
-                href={profile.links.resume}
-                className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-sm font-semibold text-black transition hover:opacity-90"
-              >
-                <span>Resume</span>
-                <ArrowRight className="h-4 w-4" />
-              </a>
-            </div>
-          </div>
-        </header>
+function Tile({ item }: { item: Entry }) {
+  const base =
+    "grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-[10px] border border-line sm:h-16 sm:w-16 sm:rounded-xl";
+  if (item.logo) {
+    return (
+      <div className={`${base} bg-white p-1.5`}>
+        <img src={asset(item.logo)} alt="" loading="lazy" className="h-full w-full object-contain" />
+      </div>
+    );
+  }
+  if (item.icon) {
+    const Icon = item.icon;
+    return (
+      <div className={`${base} bg-accent-soft text-accent`}>
+        <Icon className="h-6 w-6" strokeWidth={1.7} aria-hidden="true" />
+      </div>
+    );
+  }
+  return (
+    <div
+      aria-hidden="true"
+      className={`${base} bg-surface-solid font-mono text-[12px] font-bold tracking-tight text-accent sm:text-[13px]`}
+    >
+      {item.mark}
+    </div>
+  );
+}
 
-        {/* Hero */}
-        <main className="relative">
-          <div className="mx-auto max-w-6xl px-6">
-            <div className="py-16 md:py-20">
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="flex flex-col md:flex-row gap-6 md:gap-8"
-              >
-                <motion.img
-                  src={profileImageSrc}
-                  alt="Profile"
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                  className="h-48 w-48 md:h-64 md:w-64 mx-auto md:mx-0 rounded-3xl border-2 border-white/20 bg-white/5 shadow-[0_0_40px_rgba(255,255,255,0.15)] object-cover"
-                />
-
-                <div className="flex flex-1 flex-col gap-6">
-                  <div className="inline-flex w-fit items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/70">
-                    <span className="h-1.5 w-1.5 rounded-full bg-white/60" />
-                    <span>
-                      {heroTitleDone
-                        ? profile.location
-                        : scrambleToBinary(
-                            profile.location,
-                            heroScrambleProgress,
-                          )}
+function EntryList({ items }: { items: Entry[] }) {
+  return (
+    <div className="grid gap-3">
+      {items.map((item, i) => (
+        <div key={item.title} data-reveal style={{ transitionDelay: `${Math.min(i, 4) * 70}ms` }}>
+          <article className="entry flex items-start gap-3.5 rounded-[14px] border border-transparent px-1 py-3.5 sm:gap-5 sm:p-[18px]">
+            <Tile item={item} />
+            <div className="min-w-0 flex-1 leading-[1.55]">
+              <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
+                <h3 className="text-base font-bold leading-[1.45] tracking-[-0.01em]">{item.title}</h3>
+                {item.date && (
+                  <span className="shrink-0 text-sm tabular-nums text-muted sm:whitespace-nowrap">
+                    {item.date}
+                  </span>
+                )}
+              </div>
+              {item.role && <p className="mt-0.5 font-medium text-accent">{item.role}</p>}
+              {item.sub && <p className="text-[14.5px] text-muted">{item.sub}</p>}
+              {item.desc && <p className="mt-1 max-w-[64ch] text-[14.5px]">{item.desc}</p>}
+              {(item.badge || item.tags || item.href) && (
+                <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                  {item.badge && (
+                    <span className="rounded-md bg-accent-soft px-2.5 py-0.5 text-[13.5px] font-semibold text-accent">
+                      {item.badge}
                     </span>
-                    <span className="text-white/30">•</span>
-                    <span className="hidden sm:inline">
-                      {heroTitleDone
-                        ? "Open to research + internships"
-                        : scrambleToBinary(
-                            "Open to research + internships",
-                            heroScrambleProgress,
-                          )}
-                    </span>
-                  </div>
-
-                  {heroTitleDone ? (
-                    <h1 className="text-balance text-4xl font-semibold tracking-tight md:text-6xl">
-                      Build <span className="text-white/60">impactful</span>{" "}
-                      systems
-                      <br />
-                      <span className="bg-gradient-to-r from-white via-white/70 to-white/40 bg-clip-text text-transparent">
-                        from idea to shipped demo.
-                      </span>
-                    </h1>
-                  ) : (
-                    <h1 className="font-mono text-balance text-4xl font-semibold tracking-tight text-white/90 md:text-6xl">
-                      {heroTitleLine1}
-                      <br />
-                      <span className="text-white/70">{heroTitleLine2}</span>
-                    </h1>
                   )}
-
-                  <p className="max-w-2xl text-pretty text-base text-white/70 md:text-lg">
-                    {heroTitleDone
-                      ? "I’m a CS student focused on XR + computer vision. I like clean UX, measurable loops, and prototypes that survive real usage."
-                      : scrambleToBinary(
-                          "I’m a CS student focused on XR + computer vision. I like clean UX, measurable loops, and prototypes that survive real usage.",
-                          heroScrambleProgress,
-                        )}
-                  </p>
-                  <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                    <p className="text-sm text-white/80">
-                      {heroTitleDone
-                        ? profile.tagline
-                        : scrambleToBinary(
-                            profile.tagline,
-                            heroScrambleProgress,
-                          )}
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    {TAGS.map((t) => (
-                      <Pill key={t}>
-                        {heroTitleDone
-                          ? t
-                          : scrambleToBinary(t, heroScrambleProgress)}
-                      </Pill>
-                    ))}
-                  </div>
-
-                  <div className="flex flex-col gap-3 sm:flex-row">
+                  {item.tags && (
+                    <span className="font-mono text-[12.5px] text-muted">{item.tags.join(" · ")}</span>
+                  )}
+                  {item.href && (
                     <a
-                      href="#projects"
-                      className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90"
+                      href={item.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="link inline-flex items-center gap-1 text-sm font-medium"
                     >
-                      {heroTitleDone
-                        ? "View Projects"
-                        : scrambleToBinary(
-                            "View Projects",
-                            heroScrambleProgress,
-                          )}{" "}
-                      <ArrowRight className="h-4 w-4" />
+                      <Github className="h-3.5 w-3.5" aria-hidden="true" />
+                      Code
                     </a>
-                    <a
-                      href={profile.links.email}
-                      className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-white/80 transition hover:bg-white/10"
-                    >
-                      {heroTitleDone
-                        ? "Email me"
-                        : scrambleToBinary(
-                            "Email me",
-                            heroScrambleProgress,
-                          )}{" "}
-                      <Mail className="h-4 w-4" />
-                    </a>
-                  </div>
+                  )}
                 </div>
-              </motion.div>
-
-              <div className="mt-10 grid gap-4 md:grid-cols-3">
-                {highlights.map((h) => (
-                  <Card key={h.title}>
-                    <div className="flex items-start gap-3">
-                      <div className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/5">
-                        {h.icon}
-                      </div>
-                      <div>
-                        <div className="text-sm font-semibold">{h.title}</div>
-                        <div className="mt-1 text-sm text-white/70">
-                          {h.body}
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
+              )}
             </div>
+          </article>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ---------- page ---------- */
+
+export default function App() {
+  const heroRef = useRef<HTMLElement>(null);
+  const { theme, toggle: toggleTheme } = useTheme();
+  const active = useActiveSection();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [toast, setToast] = useState<"" | "shown" | "hidden">("");
+  const toastTimer = useRef(0);
+  useReveal();
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const close = () => setMenuOpen(false);
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && close();
+    document.addEventListener("click", close);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("click", close);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [menuOpen]);
+
+  // Copy the address instead of relying on a configured mail app; modified clicks still open mailto.
+  const copyEmail = (e: MouseEvent<HTMLAnchorElement>) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+    e.preventDefault();
+    const openMail = () => {
+      window.location.href = `mailto:${profile.email}`;
+    };
+    if (!navigator.clipboard || !window.isSecureContext) return openMail();
+    navigator.clipboard.writeText(profile.email).then(() => {
+      setToast("shown");
+      window.clearTimeout(toastTimer.current);
+      toastTimer.current = window.setTimeout(() => setToast("hidden"), 4000);
+    }, openMail);
+  };
+
+  const navLink = (id: string) =>
+    `block rounded-full px-2.5 py-1.5 text-sm font-medium transition-colors ${
+      active === id ? "bg-accent-soft text-fg" : "text-muted hover:bg-accent-soft hover:text-fg"
+    }`;
+
+  return (
+    <div className="relative isolate min-h-screen">
+      <div aria-hidden="true" className="bg-grid" />
+      <NeuralNet anchor={heroRef} />
+
+      <header className="topbar sticky top-0 z-20 border-b border-line bg-[var(--topbar-bg)] backdrop-blur-md backdrop-saturate-[1.8]">
+        <nav
+          aria-label="Primary"
+          className="relative mx-auto flex h-14 max-w-page items-center gap-4 px-[var(--gutter)]"
+        >
+          <a href="#top" className="shrink-0 font-mono text-base font-bold tracking-[-0.01em] text-fg">
+            {profile.handle}
+          </a>
+
+          <ul className="ml-auto hidden gap-1 lg:flex">
+            {NAV.map(({ id, label }) => (
+              <li key={id}>
+                <a href={`#${id}`} className={navLink(id)}>
+                  {label}
+                </a>
+              </li>
+            ))}
+          </ul>
+
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            className="ml-auto grid h-9 w-9 shrink-0 place-items-center rounded-full border border-line bg-surface text-fg transition hover:-rotate-[15deg] hover:border-accent lg:ml-0"
+          >
+            {theme === "dark" ? <Sun className="h-[18px] w-[18px]" /> : <Moon className="h-[18px] w-[18px]" />}
+          </button>
+
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setMenuOpen((open) => !open);
+            }}
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
+            aria-controls="mobile-nav"
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-line bg-surface text-fg transition hover:border-accent lg:hidden"
+          >
+            {menuOpen ? <X className="h-[18px] w-[18px]" /> : <Menu className="h-[18px] w-[18px]" />}
+          </button>
+
+          {menuOpen && (
+            <ul
+              id="mobile-nav"
+              className="absolute inset-x-0 top-full flex flex-col gap-0.5 border-b border-line bg-bg px-[var(--gutter)] pb-3.5 pt-2 shadow-[var(--shadow)] lg:hidden"
+            >
+              {NAV.map(({ id, label }) => (
+                <li key={id}>
+                  <a href={`#${id}`} className={`${navLink(id)} !rounded-[10px] !px-3.5 !py-[11px] !text-[15px]`}>
+                    {label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </nav>
+      </header>
+
+      <main id="top" className="mx-auto max-w-page px-[var(--gutter)]">
+        {/* Hero */}
+        <section
+          ref={heroRef}
+          className="grid items-center gap-6 pb-11 pt-10 text-center md:min-h-[440px] md:grid-cols-[minmax(0,1fr)_auto] md:gap-11 md:pt-[72px] md:text-left"
+        >
+          <div data-reveal>
+            <Typed text={profile.eyebrow} />
+            <h1 className="text-[clamp(32px,6vw,44px)] font-extrabold leading-[1.15] tracking-[-0.035em]">
+              {profile.name}
+            </h1>
+            <ul className="mt-7 flex flex-wrap justify-center gap-2.5 md:justify-start md:gap-2">
+              <Chip href={`mailto:${profile.email}`} icon={Mail} label="Email" onClick={copyEmail} />
+              <Chip href={profile.links.resume} icon={FileText} label="Resume" />
+              <Chip href={profile.links.linkedin} icon={Linkedin} label="LinkedIn" />
+              <Chip href={profile.links.github} icon={Github} label="GitHub" />
+              <Chip href={profile.links.blog} icon={PenLine} label="Blog" />
+            </ul>
           </div>
-
-          {/* Projects */}
-          <Section
-            id="projects"
-            title="Selected Projects"
-            kicker="Featured work & research"
+          <div
+            data-reveal
+            className="hero-photo order-first mx-auto h-[150px] w-[150px] md:order-none md:mx-0 md:h-[200px] md:w-[200px]"
           >
-            <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-              <div className="text-sm text-white/60">
-                Search projects by keyword (title, description, tags).
+            <img src={asset(profile.photo)} alt={`Portrait of ${profile.name}`} width={400} height={400} />
+          </div>
+        </section>
+
+        <Section id="about" icon={User} title="About">
+          <div className="max-w-[68ch] space-y-[0.9em]">
+            <p data-reveal>
+              I'm an undergraduate at{" "}
+              <a className="link" href="https://www.stonybrook.edu/" target="_blank" rel="noreferrer">
+                Stony Brook University
+              </a>
+              , majoring in Computer Science with a minor in Industrial Engineering, and I expect to
+              graduate in August 2027. I work on computer vision and XR for medical imaging and
+              robotics.
+            </p>
+            <p data-reveal>
+              I'm currently an undergraduate research assistant at the Spatial Intelligence Lab, Stony
+              Brook University, advised by Prof. Francois Rameau. Before that, I was a visiting research
+              intern at the Artificial Medical Imaging Lab, Pusan National University, and an
+              undergraduate researcher at the Computer Vision Lab and the Center for Visual Computing at
+              Stony Brook, where I co-authored a paper on real-time XR volumetric medical imaging (under
+              review for IEEE VR 2027).
+            </p>
+            <p data-reveal>Open to research and internship opportunities.</p>
+          </div>
+        </Section>
+
+        <Section id="news" icon={Megaphone} title="News">
+          <ul className="grid gap-1">
+            {news.map(({ date, text }, i) => (
+              <li
+                key={date + text}
+                data-reveal
+                style={{ transitionDelay: `${Math.min(i, 4) * 70}ms` }}
+                className="flex flex-col gap-1 py-1.5 sm:flex-row sm:items-baseline sm:gap-4"
+              >
+                <time className="w-fit shrink-0 rounded-md bg-accent-soft px-2.5 py-0.5 text-[13px] font-semibold tabular-nums text-accent">
+                  {date}
+                </time>
+                <span>{text}</span>
+              </li>
+            ))}
+          </ul>
+        </Section>
+
+        <Section id="education" icon={GraduationCap} title="Education">
+          <EntryList items={education} />
+        </Section>
+
+        <Section id="research" icon={FlaskConical} title="Research">
+          <EntryList items={research} />
+        </Section>
+
+        <Section id="experience" icon={Briefcase} title="Experience">
+          <EntryList items={experience} />
+        </Section>
+
+        <Section id="projects" icon={FolderGit2} title="Projects">
+          <EntryList items={projects} />
+        </Section>
+
+        <Section id="awards" icon={Award} title="Honors & Awards">
+          <ul className="awards relative pl-[22px]">
+            {awards.map(({ title, detail, date }, i) => (
+              <li
+                key={title}
+                data-reveal
+                style={{ transitionDelay: `${Math.min(i, 4) * 70}ms` }}
+                className="relative py-2 leading-[1.55]"
+              >
+                <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
+                  <strong className="font-bold">{title}</strong>
+                  {date && <span className="shrink-0 text-sm tabular-nums text-muted">{date}</span>}
+                </div>
+                <p className="text-[14.5px] text-muted">{detail}</p>
+              </li>
+            ))}
+          </ul>
+        </Section>
+
+        <Section id="skills" icon={Wrench} title="Skills">
+          <dl className="grid gap-2">
+            {skills.map(({ label, items }, i) => (
+              <div
+                key={label}
+                data-reveal
+                style={{ transitionDelay: `${i * 70}ms` }}
+                className="grid gap-0.5 sm:grid-cols-[130px_1fr] sm:gap-6"
+              >
+                <dt className="pt-[3px] font-mono text-[13px] font-medium text-muted">{label}</dt>
+                <dd>{items.join(", ")}</dd>
               </div>
-              <div className="relative w-full md:w-96">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
-                <input
-                  value={query}
-                  onChange={(e) => {
-                    setQuery(e.target.value);
-                    setShowAllProjects(false);
-                  }}
-                  placeholder="Search…"
-                  className="w-full rounded-2xl border border-white/10 bg-white/5 py-2 pl-9 pr-3 text-sm text-white placeholder:text-white/40 outline-none transition focus:border-white/20"
-                />
-              </div>
-            </div>
+            ))}
+          </dl>
+        </Section>
+      </main>
 
-            <div className="space-y-6">
-              {visibleProjects.map((p, idx) => (
-                <Card key={`${p.title}-${idx}`} className="group/project">
-                  <div className="flex flex-col gap-6 md:flex-row md:gap-8">
-                    {/* Project Thumbnail */}
-                    <div className="flex-shrink-0">
-                      <div className="relative h-48 w-full overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-white/10 to-white/5 md:h-44 md:w-56">
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          {p.featured ? (
-                            <div className="flex flex-col items-center gap-3">
-                              <div className="rounded-2xl border border-white/20 bg-white/10 p-4 backdrop-blur">
-                                {p.icon ?? (
-                                  <Code2 className="h-8 w-8 text-white/80" />
-                                )}
-                              </div>
-                              <div className="text-xs text-white/50">
-                                Featured Project
-                              </div>
-                            </div>
-                          ) : (
-                            <Code2 className="h-12 w-12 text-white/40" />
-                          )}
-                        </div>
-                        {p.featured && (
-                          <div className="absolute right-2 top-2">
-                            <div className="rounded-full border border-white/20 bg-white/10 px-2 py-1 text-xs text-white/80 backdrop-blur">
-                              ⭐ Featured
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
+      <footer className="mx-auto max-w-page px-[var(--gutter)]">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line pb-10 pt-6 text-[13px] text-muted">
+          <p>© {new Date().getFullYear()} Moonkyu Jun</p>
+          <a href="#top" className="link">
+            Back to top ↑
+          </a>
+        </div>
+      </footer>
 
-                    {/* Project Details */}
-                    <div className="flex flex-1 flex-col">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3">
-                            <h3 className="text-xl font-semibold text-white group-hover/project:text-white/90">
-                              {p.title}
-                            </h3>
-                            <span className="text-sm text-white/40">
-                              {p.date}
-                            </span>
-                          </div>
-                          <p className="mt-3 text-base leading-relaxed text-white/70">
-                            {p.desc}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        {p.tags.map((t: string) => (
-                          <Pill key={t}>{t}</Pill>
-                        ))}
-                      </div>
-
-                      <div className="mt-6 flex flex-wrap items-center gap-3">
-                        {p.links.github && (
-                          <a
-                            href={p.links.github}
-                            className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 transition hover:bg-white/10"
-                          >
-                            <Github className="h-4 w-4" />
-                            <span>Code</span>
-                          </a>
-                        )}
-                        {p.links.demo && (
-                          <a
-                            href={p.links.demo}
-                            className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 transition hover:bg-white/10"
-                          >
-                            <ExternalLink className="h-4 w-4" />
-                            <span>Demo</span>
-                          </a>
-                        )}
-                        {"paper" in p.links && p.links.paper && (
-                          <a
-                            href={p.links.paper}
-                            className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 transition hover:bg-white/10"
-                          >
-                            <FlaskConical className="h-4 w-4" />
-                            <span>Paper</span>
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-
-            {hasMoreProjects && (
-              <div className="mt-6 flex justify-center">
-                <button
-                  type="button"
-                  onClick={() => setShowAllProjects((prev) => !prev)}
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-white/80 transition hover:bg-white/10"
-                >
-                  {showAllProjects ? "Show less" : "Show more"}
-                </button>
-              </div>
-            )}
-
-            {filteredProjects.length === 0 && (
-              <div className="py-12 text-center text-white/50">
-                No projects found matching "{query}"
-              </div>
-            )}
-          </Section>
-
-          {/* Skills */}
-          <Section
-            id="skills"
-            title="Technical Skills"
-            kicker="Tools & technologies"
-          >
-            <div className="grid gap-4 md:grid-cols-2">
-              <Card>
-                <div className="flex items-start gap-3">
-                  <Code2 className="h-5 w-5 text-white/80" />
-                  <div className="flex-1">
-                    <div className="text-sm font-semibold">Languages</div>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {skills.languages.map((lang) => (
-                        <Pill key={lang}>{lang}</Pill>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </Card>
-
-              <Card>
-                <div className="flex items-start gap-3">
-                  <Cpu className="h-5 w-5 text-white/80" />
-                  <div className="flex-1">
-                    <div className="text-sm font-semibold">ML/CV</div>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {skills.mlcv.map((tech) => (
-                        <Pill key={tech}>{tech}</Pill>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </Card>
-
-              <Card>
-                <div className="flex items-start gap-3">
-                  <Layers className="h-5 w-5 text-white/80" />
-                  <div className="flex-1">
-                    <div className="text-sm font-semibold">Platforms</div>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {skills.platforms.map((platform) => (
-                        <Pill key={platform}>{platform}</Pill>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </Card>
-
-              <Card>
-                <div className="flex items-start gap-3">
-                  <FlaskConical className="h-5 w-5 text-white/80" />
-                  <div className="flex-1">
-                    <div className="text-sm font-semibold">
-                      Visualization/XR
-                    </div>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {skills.xr.map((xr) => (
-                        <Pill key={xr}>{xr}</Pill>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            </div>
-          </Section>
-
-          {/* Experience */}
-          <Section
-            id="experience"
-            title="Experience"
-            kicker="Things I’ve done that I can prove"
-          >
-            <div className="grid gap-4">
-              {experience.map((e) => (
-                <Card key={e.role + e.org}>
-                  <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
-                    <div>
-                      <div className="text-base font-semibold">{e.role}</div>
-                      <div className="mt-1 text-sm text-white/70">{e.org}</div>
-                      {e.location && (
-                        <div className="text-sm text-white/50">
-                          {e.location}
-                        </div>
-                      )}
-                    </div>
-                    <div className="text-sm text-white/50">{e.period}</div>
-                  </div>
-                  <ul className="mt-4 list-disc space-y-2 pl-5 text-sm text-white/70">
-                    {e.bullets.map((b: string) => (
-                      <li key={b}>{b}</li>
-                    ))}
-                  </ul>
-                </Card>
-              ))}
-            </div>
-          </Section>
-
-          {/* Contact */}
-          <Section
-            id="contact"
-            title="Contact"
-            kicker="Let’s build something useful"
-          >
-            <div className="grid gap-4 md:grid-cols-3">
-              <Card className="md:col-span-2">
-                <div className="text-sm text-white/70">
-                  The fastest way to reach me is email. If you’re contacting
-                  about research/internship, include: (1) what you’re building,
-                  (2) timeline, (3) what success looks like.
-                </div>
-                <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                  <a
-                    href={profile.links.email}
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90"
-                  >
-                    Email <Mail className="h-4 w-4" />
-                  </a>
-                  <a
-                    href={profile.links.linkedin}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-white/80 transition hover:bg-white/10"
-                  >
-                    LinkedIn <Linkedin className="h-4 w-4" />
-                  </a>
-                </div>
-              </Card>
-
-              <Card>
-                <div className="text-sm font-semibold">Quick links</div>
-                <div className="mt-4 space-y-2">
-                  <a
-                    href={profile.links.github}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/80 transition hover:bg-white/10"
-                  >
-                    <span className="inline-flex items-center gap-2">
-                      <Github className="h-4 w-4" /> GitHub
-                    </span>
-                    <ExternalLink className="h-4 w-4 text-white/40" />
-                  </a>
-                  <a
-                    href={profile.links.resume}
-                    className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/80 transition hover:bg-white/10"
-                  >
-                    <span className="inline-flex items-center gap-2">
-                      <ArrowRight className="h-4 w-4" /> Resume
-                    </span>
-                    <ExternalLink className="h-4 w-4 text-white/40" />
-                  </a>
-                </div>
-
-                <div className="mt-6 text-xs text-white/50">
-                  © {new Date().getFullYear()} {profile.name}
-                </div>
-              </Card>
-            </div>
-          </Section>
-
-          {/* Yutnori mini game */}
-          <Section
-            id="yutnori"
-            title="Quick Yut Toss"
-            kicker="Play Traditional Korean Game!"
-          >
-            <div className="mx-auto max-w-3xl">
-              <Card>
-                <div className="flex flex-col gap-5">
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <p className="text-sm text-white/70">
-                      Toss the sticks and see how they land. Marked stick
-                      enables Back Do.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={throwYut}
-                      className="inline-flex items-center justify-center rounded-xl bg-white px-4 py-2 text-sm font-semibold text-black transition hover:opacity-90"
-                    >
-                      Throw Yut
-                    </button>
-                  </div>
-
-                  <div className="relative h-72 overflow-hidden rounded-2xl border border-white/10 bg-[radial-gradient(circle_at_20%_15%,rgba(255,255,255,0.08),transparent_40%),radial-gradient(circle_at_80%_70%,rgba(255,255,255,0.06),transparent_42%),linear-gradient(145deg,rgba(255,255,255,0.06),rgba(255,255,255,0.01))]">
-                    <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[size:30px_30px] opacity-25" />
-                    {(
-                      yutResult?.sticks ??
-                      Array.from({ length: 4 }, () => "back")
-                    ).map((side, index) => {
-                      const isFront = side === "front";
-                      const isMarkedStick = index === 0;
-                      const layout =
-                        yutResult?.layout[index] ?? defaultYutLayout[index];
-
-                      return (
-                        <motion.div
-                          key={`${throwCount}-${index}`}
-                          initial={{
-                            left: "50%",
-                            top: "50%",
-                            rotate: 0,
-                            scale: 0.8,
-                            opacity: 0,
-                          }}
-                          animate={{
-                            left: `${layout.x}%`,
-                            top: `${layout.y}%`,
-                            rotate: layout.rotate,
-                            scale: layout.scale,
-                            opacity: 1,
-                          }}
-                          transition={{
-                            duration: 0.55,
-                            delay: index * 0.06,
-                            type: "spring",
-                            stiffness: 170,
-                            damping: 14,
-                          }}
-                          className="absolute -translate-x-1/2 -translate-y-1/2"
-                          style={{ zIndex: index + 1 }}
-                        >
-                          <div
-                            className={`relative h-36 w-11 rounded-[999px] border shadow-[0_14px_24px_rgba(0,0,0,0.45)] sm:h-40 sm:w-12 ${
-                              isFront
-                                ? "border-[#8a5a2a]/80 bg-gradient-to-b from-[#d6b785] via-[#b98a55] to-[#7a4e26]"
-                                : "border-[#c8b487]/80 bg-gradient-to-b from-[#f0e2bd] via-[#e7d7af] to-[#cfbb8d]"
-                            }`}
-                          >
-                            <div className="pointer-events-none absolute inset-x-[18%] top-3 h-[1px] bg-white/35" />
-                            <div className="pointer-events-none absolute inset-x-[22%] bottom-3 h-[1px] bg-black/25" />
-
-                            {isFront ? (
-                              <div className="absolute inset-0 flex flex-col items-center justify-center gap-5">
-                                {Array.from({ length: 3 }).map(
-                                  (_, markIndex) => (
-                                    <div
-                                      key={markIndex}
-                                      className="relative h-4 w-4 opacity-85"
-                                    >
-                                      <span className="absolute left-1/2 top-1/2 h-[2px] w-4 -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-full bg-[#4f3017]" />
-                                      <span className="absolute left-1/2 top-1/2 h-[2px] w-4 -translate-x-1/2 -translate-y-1/2 -rotate-45 rounded-full bg-[#4f3017]" />
-                                    </div>
-                                  ),
-                                )}
-                              </div>
-                            ) : (
-                              <div className="pointer-events-none absolute inset-0 opacity-60">
-                                <span className="absolute left-[30%] top-[22%] h-[1px] w-7 rotate-6 bg-[#b59766]/75" />
-                                <span className="absolute left-[22%] top-[38%] h-[1px] w-8 -rotate-3 bg-[#b59766]/75" />
-                                <span className="absolute left-[28%] top-[54%] h-[1px] w-6 rotate-12 bg-[#b59766]/75" />
-                                <span className="absolute left-[26%] top-[70%] h-[1px] w-8 -rotate-8 bg-[#b59766]/75" />
-                              </div>
-                            )}
-
-                            {isMarkedStick && (
-                              <div className="absolute right-1 top-1 rounded-full border border-black/20 bg-black/25 px-1.5 py-0.5 text-[10px] font-semibold text-white/90">
-                                M
-                              </div>
-                            )}
-                          </div>
-                        </motion.div>
-                      );
-                    })}
-
-                    {!yutResult && (
-                      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full border border-white/15 bg-black/40 px-3 py-1 text-xs text-white/70">
-                        Click Throw Yut to toss
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="rounded-xl border border-white/10 bg-black/20 px-4 py-3">
-                    {yutResult ? (
-                      <div className="flex flex-wrap items-center gap-3 text-sm">
-                        <span className="text-white/60">Result</span>
-                        <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 font-semibold text-white">
-                          {yutResult.name}
-                        </span>
-                        <span className="text-white/60">Score</span>
-                        <span className="font-semibold text-white/90">
-                          {yutResult.score}
-                        </span>
-                        <span className="text-white/40">|</span>
-                        <span className="text-white/60">
-                          {yutResult.sticks.map((side, idx) => (
-                            <span
-                              key={`${side}-${idx}`}
-                              className="mr-2 inline-block"
-                            >
-                              S{idx + 1}:{side === "front" ? "F" : "B"}
-                              {idx === 0 ? "*" : ""}
-                            </span>
-                          ))}
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="text-sm text-white/50">
-                        No throw yet. Press "Throw Yut".
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </Card>
-            </div>
-          </Section>
-
-          {/* Footer */}
-          <footer className="border-t border-white/10 py-10">
-            <div className="mx-auto flex max-w-6xl items-center justify-between px-6 text-xs text-white/50">
-              <span>Built with React + Tailwind.</span>
-              <div className="flex items-center gap-3">
-                <a href="#" className="hover:text-white/80">
-                  Top
-                </a>
-                <a
-                  href={profile.links.email}
-                  className="inline-flex items-center gap-1 hover:text-white/80"
-                >
-                  <Mail className="h-3.5 w-3.5" />
-                  <span>Email</span>
-                </a>
-              </div>
-            </div>
-          </footer>
-        </main>
+      <div role="status" aria-live="polite" className={`toast ${toast === "shown" ? "is-visible" : ""}`}>
+        {toast && (
+          <>
+            Copied <strong>{profile.email}</strong> ·{" "}
+            <a className="link" href={`mailto:${profile.email}`}>
+              Open mail app
+            </a>
+          </>
+        )}
       </div>
     </div>
   );
