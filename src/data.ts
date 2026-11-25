@@ -28,7 +28,7 @@ export const profile = {
   email: "moonkyu.jun@stonybrook.edu",
   links: {
     resume:
-      "https://drive.google.com/file/d/1lPvVYdwD3CBrGHX4_Wk_4db6Fi_SEFYS/view?usp=sharing",
+      "https://drive.google.com/file/d/1HjMgfU69ibfgoSwFOzx6b1t9hsaVwr0i/view?usp=sharing",
     linkedin: "https://www.linkedin.com/in/mkjunkevin",
     github: "https://github.com/mkjun2016",
     blog: "https://velog.io/@mkjun2022/posts",
